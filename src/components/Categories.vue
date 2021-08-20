@@ -7,9 +7,9 @@
             v-model="selection"
         >
           <option value="" disabled selected>Select a category...</option>
-          <option value="Personal Documents">Personal Documents</option>
-          <option value="Canadian Entity Documents">Canadian Entity Documents</option>
-          <option value="Current Entity Documents">Current Entity Documents</option>
+          <option v-bind:key="category.id" v-for="category in myData.categories" :value="category.id">
+            {{category.category}}
+          </option>
         </select>
 
         <div class="docues" v-if="isSelected">
@@ -25,6 +25,7 @@
 <script>
     import Documents from './Documents.vue'
     import CrudControls from './CrudControls.vue'
+    import dummyData from '../../models/DummyDatabase'
 
     export default {
       name: 'Categories',
@@ -53,18 +54,20 @@
               name: 'C',
             },
           ],
+          myData: dummyData,
         }
       },
       methods: {
         async onChange(event) {
-          console.log(event.target.value)
-          let dummyData = await fetch('../../models/database.json')
-          console.log(dummyData)
+          console.log("TARGET: ", event.target.value)
+          // let dummyData = await fetch('../../models/database.json')
+          // console.log(dummyData)
           this.isSelected=true
+          console.log(dummyData)
         },
-        fetchData(event) {
-          console.log("fetching data!", event)
-        }
+        // fetchData(event) {
+        //   console.log("fetching data!", event)
+        // }
       }
     }
 </script>
