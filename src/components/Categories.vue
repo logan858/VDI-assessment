@@ -14,7 +14,7 @@
 
         <div class="docues" v-if="isSelected">
             <div class="document-title">
-              {{ selection }}
+              {{ selectedName }}
             </div>
             <Documents 
               v-if="filteredDocuments"
@@ -28,7 +28,11 @@
         </div>
 
         <div class="controls" v-if="isSelected">
-            <CreateDoc v-bind:id-length="idLength" :category-id="selection"/>
+            <CreateDoc 
+              v-bind:id-length="idLength" 
+              :category-id="selection"
+              v-on:submit-add="submitAdd"
+            />
         </div>
     </div>
 </template>
@@ -48,6 +52,7 @@
         return {
           isSelected: false,
           selection: "",
+          selectedName: "",
           categories: dummyData.categories,
           documents: dummyData.documents,
           idLength: dummyData.documents.length,
@@ -58,7 +63,8 @@
       methods: {
         async onChange(event) {
           this.selection = event.target.value
-          this.isSelected=true
+          this.isSelected = true
+          this.selectedName = this.categories[parseInt(event.target.value, 10) - 1].category 
           this.filteredDocuments = this.documents.filter(x => x.category_id == this.selection)
           this.isEdit = this.filteredDocuments.map(function(x) {
                 return { 
@@ -66,6 +72,7 @@
                     edit: false
                 }
             })
+          this.idLength = documents.length
         },
         deleteDoc: function (id, objInd) {
           let ind = this.documents.findIndex(x => x.id === id)
@@ -83,6 +90,22 @@
           let ind2 = this.filteredDocuments.findIndex(x => x.id === id)
           this.filteredDocuments[ind2].name = name
           this.isEdit[objInd].edit = !this.isEdit[objInd].edit
+        },
+        submitAdd: function (name, catId, idLng) {
+          let newDoc = {
+            "id": idLng,
+            "category_id": catId,
+            "name": name,
+            "created_at": new Date(Date.now()),
+            "updated_at": new Date(Date.now())
+          }
+          this.documents.push(newDoc)
+          this.filteredDocuments.push(newDoc)
+          this.isEdit.push({
+            id: idLng,
+            edit: false
+          })
+          this.idLength = documents.length
         }
       }
     }

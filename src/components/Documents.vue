@@ -7,6 +7,7 @@
                         type="text" 
                         v-on:keyup.enter="submitEdit($event, filteredDocument.id)"
                         :placeholder="filteredDocument.name"
+                        autofocus
                     />
                 </span>
                 <span id="doc-title" v-else>
@@ -38,9 +39,13 @@
                 this.$emit('show-edit', objInd)
             },
             submitEdit: function (event, id) {
-                event.target.blur()
-                let objInd = this.isEdit.findIndex(x => x.id == id)
-                this.$emit('edit-doc', id, event.target.value, objInd)
+                if (event.target.value != "") {
+                    event.target.blur()
+                    let objInd = this.isEdit.findIndex(x => x.id == id)
+                    this.$emit('edit-doc', id, event.target.value, objInd)
+                } else {
+                    event.target.blur()
+                }
             }
         },
     }
