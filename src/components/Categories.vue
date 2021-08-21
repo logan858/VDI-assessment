@@ -7,67 +7,83 @@
             v-model="selection"
         >
           <option value="" disabled selected>Select a category...</option>
-          <option v-bind:key="category.id" v-for="category in myData.categories" :value="category.id">
+          <option v-bind:key="category.id" v-for="category in categories" :value="category.id">
             {{category.category}}
           </option>
         </select>
 
         <div class="docues" v-if="isSelected">
-            <Documents v-bind:selected-text="selection" :fetched-documents="fetchedDocuments"/>
+            <div class="document-title">
+              {{ selection }}
+            </div>
+            <Documents 
+              v-if="filteredDocuments"
+              v-bind:selected-text="selection" 
+              :filtered-documents="filteredDocuments" 
+              :is-edit="isEdit"
+              v-on:delete-doc="deleteDoc"
+              v-on:edit-doc="editDoc"
+              v-on:show-edit="showEdit"
+            />
         </div>
 
         <div class="controls" v-if="isSelected">
-            <CrudControls/>
+            <CreateDoc v-bind:id-length="idLength" :category-id="selection"/>
         </div>
     </div>
 </template>
 
 <script>
     import Documents from './Documents.vue'
-    import CrudControls from './CrudControls.vue'
-    import dummyData from '../../models/DummyDatabase'
+    import CreateDoc from './CreateDoc.vue'
+    import dummyData, { documents } from '../../models/DummyDatabase'
 
     export default {
       name: 'Categories',
       components: { 
         Documents,
-        CrudControls 
+        CreateDoc 
       },
       data() {
         return {
           isSelected: false,
           selection: "",
-          fetchedDocuments: [
-            {
-              id:'1',
-              category_id: '1',
-              name: 'A',
-            },
-            {
-              id:'2',
-              category_id: '1',
-              name: 'B',
-            },
-            {
-              id:'3',
-              category_id: '1',
-              name: 'C',
-            },
-          ],
-          myData: dummyData,
+          categories: dummyData.categories,
+          documents: dummyData.documents,
+          idLength: dummyData.documents.length,
+          filteredDocuments: [],
+          isEdit: []
         }
       },
       methods: {
         async onChange(event) {
-          console.log("TARGET: ", event.target.value)
-          // let dummyData = await fetch('../../models/database.json')
-          // console.log(dummyData)
+          this.selection = event.target.value
           this.isSelected=true
-          console.log(dummyData)
+          this.filteredDocuments = this.documents.filter(x => x.category_id == this.selection)
+          this.isEdit = this.filteredDocuments.map(function(x) {
+                return { 
+                    id: [x.id],
+                    edit: false
+                }
+            })
         },
-        // fetchData(event) {
-        //   console.log("fetching data!", event)
-        // }
+        deleteDoc: function (id, objInd) {
+          let ind = this.documents.findIndex(x => x.id === id)
+          this.documents.splice(ind, 1)
+          let ind2 = this.filteredDocuments.findIndex(x => x.id === id)
+          this.filteredDocuments.splice(ind2, 1)
+          this.isEdit.splice(objInd, 1)
+        },
+        showEdit: function(ind) {
+          this.isEdit[ind].edit = !this.isEdit[ind].edit
+        },
+        editDoc: function (id, name, objInd) {
+          let ind = this.documents.findIndex(x => x.id === id)
+          documents[ind].name = name
+          let ind2 = this.filteredDocuments.findIndex(x => x.id === id)
+          this.filteredDocuments[ind2].name = name
+          this.isEdit[objInd].edit = !this.isEdit[objInd].edit
+        }
       }
     }
 </script>
@@ -103,5 +119,14 @@
     }
     .docues::-webkit-scrollbar-thumb {
       background-color: rgb(168, 168, 168);
+    }
+    .documents {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    .document-title {
+        margin-top: 10px;
+        font-size: 18px;
     }
 </style>

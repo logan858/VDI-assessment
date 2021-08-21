@@ -1,6 +1,6 @@
 <template>
     <div>
-        add edit delete
+        Add Document
     </div>
 </template>
 
